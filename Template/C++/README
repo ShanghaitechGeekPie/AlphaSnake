@@ -1,0 +1,3 @@
+We will replace AlphaSnakeIO.cpp file to change the IO method.
+Then call make clean && make to build.
+call ./AlphaSnake to run.

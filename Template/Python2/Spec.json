@@ -1,0 +1,9 @@
+{
+    "Name": "Your snake name",
+    "Team": "Your team name",
+    "Developer": [
+        "Developer name 0",
+        "Developer name 1"
+    ],
+    "Language": "Python2"
+}

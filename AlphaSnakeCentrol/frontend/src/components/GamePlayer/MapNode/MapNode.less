@@ -1,0 +1,60 @@
+.container {
+  width: 0.9803%;
+  padding-top: 0.9803%;
+  display: inline-block;
+  margin: 0px;
+  position: relative;
+}
+
+.container_d {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.container_l {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.container_border {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.inner {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  border: solid white 1px;
+  border-radius: 50%;
+
+}
+
+.inner_0 {
+  background: #0097da;
+}
+
+.inner_1 {
+  background: #ff6600;
+}
+
+.inner_2 {
+  background: #ff6600;
+}
+
+.inner_3 {
+  background: #5fbc29;
+}
+
+@keyframes active_node
+{
+  from {opacity: 1;}
+  to {opacity: 0;}
+}
+
+.inner_active {
+  animation: active_node;
+  animation-duration: .5s;
+  animation-direction: alternate;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
