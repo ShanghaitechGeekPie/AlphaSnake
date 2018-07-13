@@ -14,7 +14,7 @@ class Game(models.Model):
 class Player(models.Model):
     name = models.CharField(max_length = 255, blank = False)
     team = models.CharField(max_length = 255, blank = False)
-    game = models.ForeignKey(Game)
+    game = models.ForeignKey(Game, on_delete=models.DO_NOTHING)
     pid = models.IntegerField()
     status = models.BooleanField(default = True)
     x = models.IntegerField()
@@ -33,7 +33,7 @@ class Player(models.Model):
         ordering = ['pid']
 
 class Step(models.Model):
-    player = models.ForeignKey(Player)
+    player = models.ForeignKey(Player, on_delete=models.DO_NOTHING)
     step = models.IntegerField()
     choice = models.IntegerField()
     x = models.IntegerField()
