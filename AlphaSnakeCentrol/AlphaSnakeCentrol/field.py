@@ -29,10 +29,11 @@ class Snake():
         Use to record user state, not for external use
     '''
     def __init__(self, head=None):
-        self.state = 1
         if head == None:
+            self.state = 0
             self.body = []
         else:
+            self.state = 1
             self.body = [head]
 
     def head(self):
