@@ -51,6 +51,7 @@ class Field():
         User ID start at 1
         User state: 0: dead, 1: alive
         Food: -1 on the map
+        User length: access by using self.user_len(i) (i-th user)
     '''
     def __init__(self, num_users, num_foods= 2, map_size=(100, 100), dead2food= False):
         '''
@@ -107,7 +108,7 @@ class Field():
         else:
             return False
 
-    def hit_body(self, uid, move)->bool:
+    def hit_body(self, uid, move, moves)->bool:
         '''
             DO NOT call this externally.
             To check if the user hit a body of on the map, not only check the pixel to go whether is a body (odd
@@ -140,10 +141,15 @@ class Field():
         crush_uid = (self.map[target] + 1) // 2
         if self.map[target] % 2 != 0:
             # This is not a head, but could be a tail
-            if crush_uid < uid:
+            if crush_uid < uid or not self.users[crush_uid].state:
+                # a processed user or a dead user
                 self.users[uid].die()
                 return True
             elif target != self.users[crush_uid].tail():
+                self.users[uid].die()
+                return True
+            elif self.eat_food(crush_uid, moves[crush_id]):
+                # Although it is a tail, but the user is going to eat
                 self.users[uid].die()
                 return True
             else:
@@ -154,7 +160,7 @@ class Field():
             self.users[crush_uid].die()
             self.users[uid].die()
             return True
-        elif len(self.users[crush_uid].body) > 1:
+        elif len(self.users[crush_uid].body) > 1 or self.eat_food(crush_uid, moves[crush_id]):
             # hit the neck of other users 23333
             self.users[uid].die()
             return True
@@ -181,7 +187,9 @@ class Field():
             return
 
         if not ate:
-            self.map[self.users[uid].tail()] == 0
+            if (self.map[self.users[uid].tail()] + 1) // 2 == uid:
+                # in case it is just other users head (other_uid < uid)
+                self.map[self.users[uid].tail()] == 0
             self.users[uid].body.pop()
         if len(self.users[uid].body) > 0:
             self.map[self.users[uid].head()] -= 1
@@ -207,7 +215,7 @@ class Field():
             if not self.users[i].state:
                 continue # if user is dead
             will_eat = self.eat_food(i, moves[i])
-            died = self.hit_body(i, moves[i])
+            died = self.hit_body(i, moves[i], moves)
             if not died:
                 if will_eat:
                     food_eaten += 1
@@ -233,3 +241,7 @@ class Field():
         # return the state of the field and the users states
         states = [user.state for user in self.users]
         return (self.map, states)
+
+    def user_len(self, i):
+        assert i < len(self.users), "Too large index when consulting user length"
+        return len(self.users[i].body)
