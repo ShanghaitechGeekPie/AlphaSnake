@@ -15,12 +15,18 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
-from .views import default, info, submit, get_step
+
+from .views import getinit, postgo, getready, getmove, updategametime
 
 urlpatterns = [
-    url(r'^/$', default),
-    url(r'^info/$', info),
-    url(r'^submit/$', submit),
-    url(r'^get_step/$', get_step),
-    url(r'^admin/', admin.site.urls),
+    url(r'^init/?$', getinit),
+    url(r'^go/?$', postgo),
+    url(r'^ready/?$', getready),
+    url(r'^move/?$', getmove),
+    url(r'^update/?$', updategametime),
+    # url(r'^/$', default),
+    # url(r'^info/$', info),
+    # url(r'^submit/$', submit),
+    # url(r'^get_step/$', get_step),
+    # url(r'^admin/', admin.site.urls),
 ]
