@@ -159,7 +159,7 @@ class Field():
             elif target != self.users[crush_uid].tail():
                 self.users[uid].die()
                 return True
-            elif self.eat_food(crush_uid, moves[crush_id]):
+            elif self.eat_food(crush_uid, moves[crush_uid]):
                 # Although it is a tail, but the user is going to eat
                 self.users[uid].die()
                 return True
@@ -200,7 +200,7 @@ class Field():
         if not ate:
             if (self.map[self.users[uid].tail()] + 1) // 2 == uid:
                 # in case it is just other users head (other_uid < uid)
-                self.map[self.users[uid].tail()] == 0
+                self.map[self.users[uid].tail()] = 0
             self.users[uid].body.pop()
         if len(self.users[uid].body) > 0:
             self.map[self.users[uid].head()] -= 1
@@ -263,8 +263,9 @@ if __name__ == '__main__':
     import keyboard
 
     # perform self test
+    refresh_period = 0.01
     num_users = 1
-    field = Field(num_users, 3)
+    field = Field(num_users, 50)
 
     def rand_move(num_users):
         if num_users == 1:
@@ -279,26 +280,34 @@ if __name__ == '__main__':
                 elif keyboard.is_pressed('left'):
                     value = 3
                 else:
-                    pass
+                    value = -1
                 return np.array([0, value])
             except:
-                return [0, 1]
+                return [0, -1]
         else:
             return np.random.randint(4, size=(num_users+1))
 
     # initializing image
-    im = None
+    im = None        
+    (field_image, states) = field.go(rand_move(num_users))
+    print(states, end='')
+    try:
+        im = plt.imshow(field_image, cmap='nipy_spectral')
+        plt.pause(refresh_period)
+        plt.draw()
+    except:
+        pass
+    plt.colorbar()
     while True:
         (field_image, states) = field.go(rand_move(num_users))
 
-        print(states)
+        print('\r', end='')
+        print(states, end='')
 
         try:
-            if im == None:
-                im = plt.imshow(field_image, cmap='nipy_spectral')
-            else:
-                im.set_data(field_image)
-            plt.pause(1)
+            im.set_data(field_image)
+            plt.pause(refresh_period)
             plt.draw()
         except:
+            print()
             break
