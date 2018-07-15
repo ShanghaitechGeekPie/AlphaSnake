@@ -16,14 +16,14 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 
-from .views import getinit, postgo, getready, getmove, updategametime
+from .views import getinit, postgo, getready, getmove, updategame
 
 urlpatterns = [
     url(r'^init/?$', getinit),
     url(r'^go/?$', postgo),
     url(r'^ready/?$', getready),
     url(r'^move/?$', getmove),
-    url(r'^update/?$', updategametime),
+    url(r'^update/?$', updategame),
     # url(r'^/$', default),
     # url(r'^info/$', info),
     # url(r'^submit/$', submit),

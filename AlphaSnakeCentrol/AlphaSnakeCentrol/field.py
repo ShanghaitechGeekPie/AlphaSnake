@@ -24,10 +24,12 @@ GoRight = 1
 GoDown = 2
 GoLeft = 3
 
+
 class Snake():
     '''
         Use to record user state, not for external use
     '''
+
     def __init__(self, head=None):
         if head == None:
             self.state = 0
@@ -45,6 +47,7 @@ class Snake():
     def die(self):
         self.state = 0
 
+
 class Field():
     '''
         The object Field update it state by calling 'go' method, which takes in the movement of each participant
@@ -54,7 +57,8 @@ class Field():
         Food: -1 on the map
         User length: access by using self.user_len(i) (i-th user)
     '''
-    def __init__(self, num_users, num_foods= 2, map_size=(100, 100), dead2food= False):
+
+    def __init__(self, num_users, num_foods=2, map_size=(100, 100), dead2food=False):
         '''
             Given information to setup the field to start the game.
             Set the number un-eaten food in num_foods argument
@@ -71,7 +75,7 @@ class Field():
         self.dead2food = dead2food
 
         # initializing map and user state
-        for i in range(1, num_users+1):
+        for i in range(1, num_users + 1):
             # generate coordinates without conflict with the initial map
             x = np.random.randint(0, map_size[0])
             y = np.random.randint(0, map_size[1])
@@ -80,8 +84,8 @@ class Field():
                 y = np.random.randint(0, map_size[1])
 
             # set map and user info
-            self.map[x, y] = 2 * i;
-            self.users.append(Snake(head= (x, y)))
+            self.map[x, y] = 2 * i
+            self.users.append(Snake(head=(x, y)))
 
         # set food on the map
         for i in range(num_foods):
@@ -92,7 +96,7 @@ class Field():
                 y = np.random.randint(0, map_size[1])
             self.map[x, y] = -1
 
-    def eat_food(self, uid, move)->bool:
+    def eat_food(self, uid, move) -> bool:
         '''
             DO NOT call this function externally.
             It checks whether this movement will make this user eat a food.
@@ -117,9 +121,8 @@ class Field():
             return True
         else:
             return False
-        
 
-    def hit_body(self, uid, move, moves)->bool:
+    def hit_body(self, uid, move, moves) -> bool:
         '''
             DO NOT call this externally.
             To check if the user hit a body of on the map, not only check the pixel to go whether is a body (odd
@@ -178,12 +181,12 @@ class Field():
         else:
             # just pass the user with length 1, so close
             return False
-        
+
     def move_body(self, uid, move, ate):
         '''
             DO NOT call this function externally
             move the body of given user
-        '''        
+        '''
         user_coordinate = self.users[uid].head()
         target = []
         if move == GoUp:
@@ -208,7 +211,6 @@ class Field():
         self.users[uid].body.insert(0, target)
         self.map[self.users[uid].head()] = 2 * uid
 
-
     def go(self, moves=None):
         '''
             Given the movement of each participant, return the whole map and a dictionary of participants' states.
@@ -216,7 +218,7 @@ class Field():
         the moving direction.
             return: a matrix represented in a 2D array
                 and a list with participants' ID (a positive number) as index and a number representing state
-        ''' 
+        '''
         # make sure the lengh of the list is the number of users
         assert len(moves) == len(self.users), "Diffreent input length as declared number of users"
 
@@ -224,7 +226,7 @@ class Field():
         # iterate each users to move the snake
         for i in range(1, len(self.users)):
             if not self.users[i].state:
-                continue # if user is dead
+                continue  # if user is dead
             will_eat = self.eat_food(i, moves[i])
             died = self.hit_body(i, moves[i], moves)
             if not died:
@@ -249,7 +251,7 @@ class Field():
                 x = np.random.randint(0, map_size[0])
                 y = np.random.randint(0, map_size[1])
             self.map[(x, y)] = -1
-            
+
         # return the state of the field and the users states
         states = [user.state for user in self.users]
         return (self.map, states)
@@ -257,6 +259,7 @@ class Field():
     def user_len(self, i):
         assert i < len(self.users), "Too large index when consulting user length"
         return len(self.users[i].body)
+
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
@@ -285,10 +288,10 @@ if __name__ == '__main__':
             except:
                 return [0, -1]
         else:
-            return np.random.randint(4, size=(num_users+1))
+            return np.random.randint(4, size=(num_users + 1))
 
     # initializing image
-    im = None        
+    im = None
     (field_image, states) = field.go(rand_move(num_users))
     print(states, end='')
     try:

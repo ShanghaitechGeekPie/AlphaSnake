@@ -33,7 +33,7 @@ class Player(models.Model):
     # team = models.CharField(max_length=255, blank=False)
     game = models.ForeignKey(Game, on_delete=models.DO_NOTHING, null=True, default=None, related_name='players')
     cookie = models.CharField(max_length=255, blank=False)
-    last_move = models.OneToOneField('Step', null=True, default=None)
+    last_move = models.ForeignKey('Step', null=True, default=None)
 
     def __str__(self):
         return '[{} - {}]{}'.format(self.game, self.pid, self.name)

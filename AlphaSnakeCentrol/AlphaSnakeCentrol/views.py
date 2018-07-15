@@ -6,7 +6,9 @@ from django.http.response import HttpResponse, HttpResponseBadRequest
 
 from db.models import Game, Player, Step
 
-import datetime
+from WaitOnceEg import WaitUntilRecv
+
+GAME_THRESHOLD = 4
 
 
 def postinit(request):
@@ -17,14 +19,18 @@ def postinit(request):
     player = Player(name=request.POST['name'], cookie=cookie)
 
     with transaction.atomic():
-        game = Game.objects.select_for_update().filter(status=Game.PENDING) \
+        game = Game.objects.select_for_update().filter(status=Game.PENDING, players__count__lt=GAME_THRESHOLD) \
             .order_by('create_time')[:1].get_or_create()
         player.game = game
-        if game.player.count() == 4:
+        gid = game.id
+
+        sock_conn = WaitUntilRecv('init'.format(game.id), lambda x: x['gid'] == gid)
+
+        if game.players.count() == GAME_THRESHOLD:
             game.status = Game.READY
 
-    # TODO: get map from socket server
-    init_map = []
+    sock_conn.wait()
+    init_map = sock_conn.msg
 
     return HttpResponse(json.dumps({
         'pid': player.id,
@@ -38,35 +44,42 @@ def postgo(request):
             or 'cookie' not in request.POST or 'move' not in request.POST:
         return HttpResponseBadRequest()
 
-    try:
-        with transaction.atomic():
-            player = Player.objects.select_for_update().get(id='pid')
-            if player.cookie != request.POST['cookie']:
-                return HttpResponseBadRequest()
-            step = Step(player=player, choice=request.POST['move'])
-            step.save()
-            player.last_move = step
-    except Exception:
-        return HttpResponseBadRequest()
+    with transaction.atomic():
+        try:
+            player = Player.objects.select_for_update().get(id='pid', cookie=request.POST['cookie'])
+        except Exception:
+            return HttpResponseBadRequest()
+        step = Step(player=player, choice=int(request.POST['move']))
+        step.save()
+        player.last_move = step
+        gid = player.game.id
 
-    # TODO: get new map and status from socket server
-    new_map = []
+    sock_conn = WaitUntilRecv('judged'.format(player.game.id), lambda x: x['gid'] == gid)
+    sock_conn.wait()
+
+    new_map, player_data = sock_conn.msg
+    status = [status for pid, status in player_data if pid == player.id][0]
+    # May have error indexing, throw http500 anyway.
 
     return HttpResponse(json.dumps({
         'map': new_map,
-        'status': 'died'
+        'status': status
     }))
 
 
 def getready(request):
+    if request.method != 'POST':
+        return HttpResponseBadRequest()
     # TODO: check localhost
-    game = Game.objects.filter(status=Game.READY).order_by('time_stamp').values().first()
+    game = Game.objects.filter(status=Game.READY).order_by('time_stamp').values('id', 'players').first()
     # Maybe null but is just we need
     return HttpResponse(json.dumps(game))
 
 
 def getmove(request):
-    game = Game.objects.filter(status=Game.RUNNING).order_by('time_stamp').values().first()
+    if request.method != 'POST' or 'gid' not in request.POST:
+        return HttpResponseBadRequest()
+    game = Game.objects.filter(id=int(request.POST['gid'])).first()
     if not game:
         return HttpResponse('[]')
     moves = list(game.players.filter(last_move__time_stamp__ge=game.last_update_time)
@@ -74,14 +87,14 @@ def getmove(request):
     return HttpResponse(json.dumps(moves))
 
 
-def updategametime(request):
+def updategame(request):
     # TODO: check localhost
     if request.method != 'POST' or 'gid' not in request.POST or 'time' not in request.POST:
         return HttpResponseBadRequest()
     update_fields = {'last_update_time': request.POST['time']}
     if 'status' in request.POST:
-        update_fields['status'] = request.POST['status']
-    Game.objects.filter(id=request.GET['gid']).update(**update_fields)
+        update_fields['status'] = int(request.POST['status'])
+    Game.objects.filter(id=int(request.POST['gid'])).update(**update_fields)
     return HttpResponse('')
 
 
