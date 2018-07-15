@@ -1,5 +1,5 @@
 import numpy as np
-import copy
+import time
 '''
     This part controls the update of the field. Defining field matrix as follows:
         x means the row index, y means the column index
@@ -97,17 +97,27 @@ class Field():
             DO NOT call this function externally.
             It checks whether this movement will make this user eat a food.
         '''
-        coord = self.users[uid].body[0]
+        user_coordinate = self.users[uid].head()
+        target = []
         if move == GoUp:
-            return self.map[coord[0] - 1, coord[1]] == -1
+            target = (user_coordinate[0] - 1, user_coordinate[1])
         elif move == GoRight:
-            return self.map[coord[0], coord[1] + 1] == -1
+            target = (user_coordinate[0], user_coordinate[1] + 1)
         elif move == GoDown:
-            return self.map[coord[0] + 1, coord[1]] == -1
+            target = (user_coordinate[0] + 1, user_coordinate[1])
         elif move == GoLeft:
-            return self.map[coord[0], coord[1] - 1] == -1
+            target = (user_coordinate[0], user_coordinate[1] - 1)
         else:
             return False
+
+        # check if the request is out side of the map
+        if target[0] < 0 or target[0] >= self.map.shape[0] or target[1] < 0 or target[1] >= self.map.shape[1]:
+            return False
+        if self.map[target] == -1:
+            return True
+        else:
+            return False
+        
 
     def hit_body(self, uid, move, moves)->bool:
         '''
@@ -118,20 +128,20 @@ class Field():
             Because when head crush together, it should be two user die.
         '''
         user_coordinate = self.users[uid].head()
-        target = copy(user_coordinate)
+        target = []
         if move == GoUp:
-            target[0] -= 1
+            target = (user_coordinate[0] - 1, user_coordinate[1])
         elif move == GoRight:
-            target[1] += 1
+            target = (user_coordinate[0], user_coordinate[1] + 1)
         elif move == GoDown:
-            target[0] += 1
+            target = (user_coordinate[0] + 1, user_coordinate[1])
         elif move == GoLeft:
-            target[1] -= 1
+            target = (user_coordinate[0], user_coordinate[1] - 1)
         else:
             return False
 
         # check if the request is out side of the map
-        if target[0] < 0 or target[0] >= self.map.shape()[0] or target[1] < 0 or target[1] >= self.map.shape()[1]:
+        if target[0] < 0 or target[0] >= self.map.shape[0] or target[1] < 0 or target[1] >= self.map.shape[1]:
             self.users[uid].die()
             return True
 
@@ -161,7 +171,7 @@ class Field():
             self.users[crush_uid].die()
             self.users[uid].die()
             return True
-        elif len(self.users[crush_uid].body) > 1 or self.eat_food(crush_uid, moves[crush_id]):
+        elif len(self.users[crush_uid].body) > 1 or self.eat_food(crush_uid, moves[crush_uid]):
             # hit the neck of other users 23333
             self.users[uid].die()
             return True
@@ -175,15 +185,15 @@ class Field():
             move the body of given user
         '''        
         user_coordinate = self.users[uid].head()
-        target = copy(user_coordinate)
+        target = []
         if move == GoUp:
-            target[0] -= 1
+            target = (user_coordinate[0] - 1, user_coordinate[1])
         elif move == GoRight:
-            target[1] += 1
+            target = (user_coordinate[0], user_coordinate[1] + 1)
         elif move == GoDown:
-            target[0] += 1
+            target = (user_coordinate[0] + 1, user_coordinate[1])
         elif move == GoLeft:
-            target[1] -= 1
+            target = (user_coordinate[0], user_coordinate[1] - 1)
         else:
             return
 
@@ -230,6 +240,7 @@ class Field():
             pass
 
         # check if food is less
+        map_size = self.map.shape
         for i in range(food_eaten):
             # generate food at random location
             x = np.random.randint(0, map_size[0])
@@ -246,3 +257,48 @@ class Field():
     def user_len(self, i):
         assert i < len(self.users), "Too large index when consulting user length"
         return len(self.users[i].body)
+
+if __name__ == '__main__':
+    import matplotlib.pyplot as plt
+    import keyboard
+
+    # perform self test
+    num_users = 1
+    field = Field(num_users, 3)
+
+    def rand_move(num_users):
+        if num_users == 1:
+            try:
+                value = 0
+                if keyboard.is_pressed('up'):
+                    value = 0
+                elif keyboard.is_pressed('right'):
+                    value = 1
+                elif keyboard.is_pressed('down'):
+                    value = 2
+                elif keyboard.is_pressed('left'):
+                    value = 3
+                else:
+                    pass
+                return np.array([0, value])
+            except:
+                return [0, 1]
+        else:
+            return np.random.randint(4, size=(num_users+1))
+
+    # initializing image
+    im = None
+    while True:
+        (field_image, states) = field.go(rand_move(num_users))
+
+        print(states)
+
+        try:
+            if im == None:
+                im = plt.imshow(field_image, cmap='nipy_spectral')
+            else:
+                im.set_data(field_image)
+            plt.pause(1)
+            plt.draw()
+        except:
+            break
