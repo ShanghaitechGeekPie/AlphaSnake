@@ -279,8 +279,5 @@ typings/
 # Serverless directories
 .serverless
 
-# Mac
+# macOS
 .DS_Store
-
-# Webpack build file
-AlphaSnakeCentrol/frontend/viewer/public/bundle.js
