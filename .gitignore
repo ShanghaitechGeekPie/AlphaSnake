@@ -281,3 +281,6 @@ typings/
 
 # Mac
 .DS_Store
+
+# Webpack build file
+AlphaSnakeCentrol/frontend/viewer/public/bundle.js
