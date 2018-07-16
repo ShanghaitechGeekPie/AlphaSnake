@@ -1,12 +1,18 @@
 import json
 import os
+import base64
 
 from django.db import transaction
+# from django.db.models import Count
 from django.http.response import HttpResponse, HttpResponseBadRequest
 
 from db.models import Game, Player, Step
 
-from WaitOnceEg import WaitUntilRecv
+from .WaitOnce import WaitUntilRecv
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 GAME_THRESHOLD = 4
 
@@ -15,19 +21,30 @@ def postinit(request):
     if request.method != 'POST' or 'name' not in request.POST:
         return HttpResponseBadRequest()
 
-    cookie = os.urandom(12).encode('base64').strip()
+    cookie = base64.b64encode(os.urandom(12)).decode()
     player = Player(name=request.POST['name'], cookie=cookie)
+    player.save()
 
     with transaction.atomic():
-        game = Game.objects.select_for_update().filter(status=Game.PENDING, players__count__lt=GAME_THRESHOLD) \
+        game, _ = Game.objects.select_for_update() \
+            .filter(status=Game.PENDING, player_count__lt=GAME_THRESHOLD) \
             .order_by('create_time')[:1].get_or_create()
-        player.game = game
-        gid = game.id
+        logger.debug('Game updating.')
+        game.player_count += 1
+        game.save()
 
-        sock_conn = WaitUntilRecv('init'.format(game.id), lambda x: x['gid'] == gid)
+    logger.debug('Game update success.{}'.format(game.player_count))
 
-        if game.players.count() == GAME_THRESHOLD:
-            game.status = Game.READY
+    player.game = game
+    player.save()
+    logger.debug('Player update success.')
+    gid = game.id
+
+    sock_conn = WaitUntilRecv('init', lambda x: x['gid'] == gid)
+
+    if game.players.count() >= GAME_THRESHOLD:
+        game.status = Game.READY
+        game.save()
 
     sock_conn.wait()
     init_map = sock_conn.msg
@@ -44,21 +61,26 @@ def postgo(request):
             or 'cookie' not in request.POST or 'move' not in request.POST:
         return HttpResponseBadRequest()
 
+    step = Step(choice=int(request.POST['move']))
+    step.save()
+
     with transaction.atomic():
         try:
             player = Player.objects.select_for_update().get(id='pid', cookie=request.POST['cookie'])
         except Exception:
             return HttpResponseBadRequest()
-        step = Step(player=player, choice=int(request.POST['move']))
-        step.save()
         player.last_move = step
-        gid = player.game.id
+        player.save()
 
-    sock_conn = WaitUntilRecv('judged'.format(player.game.id), lambda x: x['gid'] == gid)
+    step.player = player
+    step.save()
+    gid = player.game.id
+
+    sock_conn = WaitUntilRecv('judged', lambda x: x['gid'] == gid)
     sock_conn.wait()
 
-    new_map, player_data = sock_conn.msg
-    status = [status for pid, status in player_data if pid == player.id][0]
+    new_map, statuses = sock_conn.msg
+    status = [status for pid, status in statuses if pid == player.id][0]
     # May have error indexing, throw http500 anyway.
 
     return HttpResponse(json.dumps({
@@ -68,12 +90,16 @@ def postgo(request):
 
 
 def getready(request):
-    if request.method != 'POST':
+    if request.method != 'GET':
         return HttpResponseBadRequest()
     # TODO: check localhost
-    game = Game.objects.filter(status=Game.READY).order_by('time_stamp').values('id', 'players').first()
+    game = Game.objects.filter(status=Game.READY).order_by('create_time').first()
+    if not game:
+        return HttpResponse(json.dump(None))
     # Maybe null but is just we need
-    return HttpResponse(json.dumps(game))
+
+    players = game.players.values_list('id', flat=True)
+    return HttpResponse(json.dumps({'id': game.id, 'players': list(players)}))
 
 
 def getmove(request):

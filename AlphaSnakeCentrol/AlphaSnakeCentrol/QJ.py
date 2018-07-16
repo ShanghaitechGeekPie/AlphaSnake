@@ -2,17 +2,17 @@
 # @Author: robertking
 # @Date:   2018-07-15 22:59:23
 # @Last Modified by:   robertking
-# @Last Modified time: 2018-07-16 02:23:09
+# @Last Modified time: 2018-07-17 04:03:31
 
 
 from field import Field
 import time
 import requests
-from SocketIO_client import SocketIO
-from WaitOnceEg import SOCKET_SERVER_URL
+from socketIO_client import SocketIO
+from WaitOnce import SOCKET_SERVER_URL
 
 
-SERVER_URL_BASE = 'http://127.0.0.1:9876'
+SERVER_URL_BASE = 'http://127.0.0.1:8000'
 
 
 def getready():
@@ -50,11 +50,12 @@ if __name__ == '__main__':
     while True:
         game = getready()
         gid = game['id']
+        print (game['players'])
         players = sorted(game['players'])
 
         field = Field(len(players))
 
-        emit('init', {'gid': gid, 'map': field.getmap()})
+        emit('init', {'gid': gid, 'map': field.map.tolist()})
         updategame(gid, RUNNING)
 
         while True:
@@ -64,7 +65,7 @@ if __name__ == '__main__':
             new_map, status = field.go(list(map(lambda x: x[1], moves)))
 
             emit('judged', {
-                'map': new_map,
+                'gid': gid, 'map': new_map.tolist(),
                 'status': list(zip(map(lambda x: x[0], moves), status))
             })
 
