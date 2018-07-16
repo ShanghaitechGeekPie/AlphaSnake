@@ -200,7 +200,7 @@ class Field():
         elif move == GoLeft:
             target = (user_coordinate[0], user_coordinate[1] - 1)
         else:
-            self.users[uid].die()s
+            self.users[uid].die()
             return
 
         if not ate:
@@ -257,7 +257,7 @@ class Field():
 
         # return the state of the field and the users states
         states = [user.state for user in self.users]
-        return (self.map, states)
+        return (self.map.reshape(-1), states)
 
     def user_len(self, i):
         assert i < len(self.users), "Too large index when consulting user length"
@@ -270,7 +270,7 @@ if __name__ == '__main__':
 
     # perform self test
     refresh_period = 0.01
-    num_users = 1
+    num_users = 7
     field = Field(num_users, 50)
 
     def rand_move(num_users):
@@ -298,7 +298,7 @@ if __name__ == '__main__':
     (field_image, states) = field.go(rand_move(num_users))
     print(states, end='')
     try:
-        im = plt.imshow(field_image, cmap='nipy_spectral')
+        im = plt.imshow(field_image.reshape(100, 100), cmap='nipy_spectral')
         plt.pause(refresh_period)
         plt.draw()
     except:
@@ -311,7 +311,7 @@ if __name__ == '__main__':
         print(states, end='')
 
         try:
-            im.set_data(field_image)
+            im.set_data(field_image.reshape(100,100))
             plt.pause(refresh_period)
             plt.draw()
         except:
