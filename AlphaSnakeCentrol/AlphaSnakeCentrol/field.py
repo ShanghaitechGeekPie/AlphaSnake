@@ -112,6 +112,7 @@ class Field():
         elif move == GoLeft:
             target = (user_coordinate[0], user_coordinate[1] - 1)
         else:
+            self.users[uid].die()
             return False
 
         # check if the request is out side of the map
@@ -141,7 +142,8 @@ class Field():
         elif move == GoLeft:
             target = (user_coordinate[0], user_coordinate[1] - 1)
         else:
-            return False
+            self.users[uid].die()
+            return True
 
         # check if the request is out side of the map
         if target[0] < 0 or target[0] >= self.map.shape[0] or target[1] < 0 or target[1] >= self.map.shape[1]:
@@ -198,6 +200,7 @@ class Field():
         elif move == GoLeft:
             target = (user_coordinate[0], user_coordinate[1] - 1)
         else:
+            self.users[uid].die()s
             return
 
         if not ate:
