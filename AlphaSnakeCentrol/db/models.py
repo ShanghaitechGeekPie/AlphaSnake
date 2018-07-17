@@ -19,9 +19,10 @@ class Game(models.Model):
     status = models.IntegerField(choices=STATUS_CHOICE, default=PENDING)
     player_count = models.IntegerField(default=0)
     # step = models.IntegerField(default=0)
-    create_time = models.DateTimeField(auto_now=True)
-    last_update_time = models.DateTimeField(null=True, default=None)
+    create_time = models.DateTimeField(auto_now_add=True)
+    last_update_time = models.DateTimeField(auto_now=True)
     # players = foreign key manager
+    winner = models.ForeignKey('Player', null=True, default=None, related_name='+')
 
     def __str__(self):
         return '[Game #{}]'.format(self.id)
@@ -30,7 +31,7 @@ class Game(models.Model):
 class Player(models.Model):
     # pid
     name = models.CharField(max_length=255, blank=False)
-    join_time = models.DateTimeField(auto_now=True)
+    join_time = models.DateTimeField(auto_now_add=True)
     # team = models.CharField(max_length=255, blank=False)
     game = models.ForeignKey(Game, on_delete=models.DO_NOTHING, null=True, default=None, related_name='players')
     cookie = models.CharField(max_length=255, blank=False)
@@ -47,7 +48,7 @@ class Step(models.Model):
     player = models.ForeignKey(Player, on_delete=models.DO_NOTHING, null=True, default=None, related_name='steps')
     # step = models.IntegerField()
     choice = models.IntegerField()
-    time_stamp = models.DateTimeField(auto_now=True)
+    time_stamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return '[Game #{} - {}({}): {}]'.format(

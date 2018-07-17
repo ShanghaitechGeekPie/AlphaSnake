@@ -1,33 +1,36 @@
-# define of step choice
-GoUndefined = -1    # only for player died
-GoUp = 0
-GoRight = 1
-GoDown = 2
-GoLeft = 3
+import requests
 
-# get the config of this game.
-def get_game_conf():
-    response = {
-        'map_max_x': 99,
-        'map_max_y': 99,
-        'id': 0,
-        'num': 2,
-        'start_position': [
-            [0, 0],
-        ],
-    }
-    return(response);
+
+# define of step choice
+class STEP:
+    UNDEFINED = -1    # only for player died
+    UP = 0
+    RIGHT = 1
+    DOWN = 2
+    LEFT = 3
+
+
+class STATUS:
+    DIED = 0
+    ALIVE = 1
+    WIN = 2
+
 
 # Submit one step and get result of this step.
 #     args: step - using GoUp | GoRight | GoDown | GoLeft.
-def submit_step(step):
-    print("[Step Submitted] {}".format(step));
-    response = {
-        'status':[
-            0,
-        ],
-        'step': [
-            step,
-        ],
-    }
-    return(response);
+
+
+class Game:
+    def __init__(self):
+        pass
+
+    def register(self, name):
+        res = requests.post('http://127.0.0.1:8000/init', {'name': name}).json()
+        self._pid = res['pid']
+        self._cookie = res['cookie']
+        return res['map']
+
+    def submit_step(self, move):
+        res = requests.post('http://127.0.0.1:8000/go',
+                            {'pid': self._pid, 'cookie': self._cookie, 'move': move}).json()
+        return res['map'], res['status']

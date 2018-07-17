@@ -3,7 +3,7 @@ import os
 import base64
 
 from django.db import transaction
-# from django.db.models import Count
+from django.db.models import F
 from django.http.response import HttpResponse, HttpResponseBadRequest
 
 from db.models import Game, Player, Step
@@ -30,7 +30,7 @@ def postinit(request):
             .filter(status=Game.PENDING, player_count__lt=GAME_THRESHOLD) \
             .order_by('create_time')[:1].get_or_create()
         logger.debug('Game updating.')
-        game.player_count += 1
+        game.player_count = F('player_count') + 1
         game.save()
 
     logger.debug('Game update success.{}'.format(game.player_count))
@@ -47,12 +47,11 @@ def postinit(request):
         game.save()
 
     sock_conn.wait()
-    init_map = sock_conn.msg
 
     return HttpResponse(json.dumps({
         'pid': player.id,
         'cookie': cookie,
-        'map': init_map
+        'map': sock_conn.msg['map']
     }))
 
 
@@ -61,16 +60,15 @@ def postgo(request):
             or 'cookie' not in request.POST or 'move' not in request.POST:
         return HttpResponseBadRequest()
 
-    step = Step(choice=int(request.POST['move']))
+    step = Step(choice=request.POST['move'])
     step.save()
 
-    with transaction.atomic():
-        try:
-            player = Player.objects.select_for_update().get(id='pid', cookie=request.POST['cookie'])
-        except Exception:
-            return HttpResponseBadRequest()
-        player.last_move = step
-        player.save()
+    update_res = Player.objects.filter(id=request.POST['pid'], cookie=request.POST['cookie']) \
+        .update(last_move=step)
+    if not update_res:
+        return HttpResponseBadRequest()
+
+    player = Player.objects.get(id=request.POST['pid'])
 
     step.player = player
     step.save()
@@ -79,12 +77,15 @@ def postgo(request):
     sock_conn = WaitUntilRecv('judged', lambda x: x['gid'] == gid)
     sock_conn.wait()
 
-    new_map, statuses = sock_conn.msg
-    status = [status for pid, status in statuses if pid == player.id][0]
+    status = sock_conn.msg['status']
+    status = [s for pid, s in status if pid == player.id][0]
     # May have error indexing, throw http500 anyway.
 
+    if status == 2:
+        Game.objects.filter(id=gid).update(winner=player)
+
     return HttpResponse(json.dumps({
-        'map': new_map,
+        'map': sock_conn.msg['map'],
         'status': status
     }))
 
@@ -95,7 +96,7 @@ def getready(request):
     # TODO: check localhost
     game = Game.objects.filter(status=Game.READY).order_by('create_time').first()
     if not game:
-        return HttpResponse(json.dump(None))
+        return HttpResponse(json.dumps(None))
     # Maybe null but is just we need
 
     players = game.players.values_list('id', flat=True)
@@ -105,11 +106,15 @@ def getready(request):
 def getmove(request):
     if request.method != 'POST' or 'gid' not in request.POST:
         return HttpResponseBadRequest()
-    game = Game.objects.filter(id=int(request.POST['gid'])).first()
+    game = Game.objects.filter(id=request.POST['gid']).first()
     if not game:
         return HttpResponse('[]')
-    moves = list(game.players.filter(last_move__time_stamp__ge=game.last_update_time)
+    moves = list(game.players.filter(last_move__time_stamp__gte=game.last_update_time)
                  .values_list('id', 'last_move__choice'))
+    # logger.debug('Player last moves at {}: {} {}'.format(
+    #              game.last_update_time,
+    #              list(game.players.values_list('id', 'last_move__choice', 'last_move__time_stamp')),
+    #              moves))
     return HttpResponse(json.dumps(moves))
 
 
@@ -119,8 +124,8 @@ def updategame(request):
         return HttpResponseBadRequest()
     update_fields = {'last_update_time': request.POST['time']}
     if 'status' in request.POST:
-        update_fields['status'] = int(request.POST['status'])
-    Game.objects.filter(id=int(request.POST['gid'])).update(**update_fields)
+        update_fields['status'] = request.POST['status']
+    Game.objects.filter(id=request.POST['gid']).update(**update_fields)
     return HttpResponse('')
 
 
