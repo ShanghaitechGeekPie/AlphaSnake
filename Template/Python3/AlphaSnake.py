@@ -14,7 +14,7 @@ def main():
         # YOUR ALGORITHM
 
         mystep = STEP.UP
-        mystep = STEP.DOWN
+        mystep = STEP.DOWN  # TOWN
         # mystep = STEP.FUNK
         # mystep = STEP.YOU
         mystep = STEP.UP
