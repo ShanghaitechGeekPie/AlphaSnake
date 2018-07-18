@@ -2,7 +2,7 @@
 # @Author: robertking
 # @Date:   2018-07-15 22:59:23
 # @Last Modified by:   robertking
-# @Last Modified time: 2018-07-18 01:38:49
+# @Last Modified time: 2018-07-19 01:38:56
 
 
 from field import Field
@@ -10,7 +10,8 @@ import time
 import requests
 from datetime import datetime
 from socketIO_client import SocketIO
-from WaitOnce import SOCKET_SERVER_URL
+# from socket_io_emitter import Emitter
+from NotificationCenter import SOCKET_SERVER_URL
 
 
 SERVER_URL_BASE = 'http://127.0.0.1:8000'
@@ -29,10 +30,12 @@ def getmoves(gid):
 
 
 socketio = SocketIO(SOCKET_SERVER_URL, verify=False)
+# socketio = Emitter({'host': '127.0.0.1', 'port': 3000})
 
 
 def emit(topic, data):
     socketio.emit(topic, data)
+    # socketio.Emit(topic, data)
 
 
 def updategame(gid, checkpoint, status=None):
@@ -61,7 +64,7 @@ if __name__ == '__main__':
         field = Field(num_players)
 
         checkpoint = datetime.utcnow()
-        emit('init', {'gid': gid, 'map': field.map.tolist()})
+        emit('init', {'gid': gid, 'map': field.map.reshape(-1).tolist()})
 
         updategame(gid, checkpoint, RUNNING)
         print('Game #{} starts.'.format(gid))
@@ -76,8 +79,7 @@ if __name__ == '__main__':
 
             new_map, raw_status = field.go(moves)
 
-            if sum(raw_status) == 1:
-                status = [2 if s else 0 for s in raw_status]
+            status = [2 if s else 0 for s in raw_status] if sum(raw_status) == 1 else raw_status
 
             checkpoint = datetime.utcnow()
             emit('judged', {
@@ -94,6 +96,5 @@ if __name__ == '__main__':
                 print('Game #{} updated, status: {}.'.format(gid, status))
 
         time.sleep(20)
-
 
 socketio.disconnect()

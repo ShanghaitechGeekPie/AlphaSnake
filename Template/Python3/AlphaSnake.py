@@ -12,7 +12,12 @@ def main():
 
     while True:
         # YOUR ALGORITHM
+
+        mystep = STEP.UP
         mystep = STEP.DOWN
+        # mystep = STEP.FUNK
+        # mystep = STEP.YOU
+        mystep = STEP.UP
 
         # Submit one step and get result of this step. call it to finish one step.
         battlefield, status = game.submit_step(mystep)
