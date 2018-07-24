@@ -2,17 +2,19 @@
 # @Author: robertking
 # @Date:   2018-07-15 22:59:23
 # @Last Modified by:   robertking
-# @Last Modified time: 2018-07-16 02:23:09
+# @Last Modified time: 2018-07-19 01:38:56
 
 
 from field import Field
 import time
 import requests
-from SocketIO_client import SocketIO
-from WaitOnceEg import SOCKET_SERVER_URL
+from datetime import datetime
+from socketIO_client import SocketIO
+# from socket_io_emitter import Emitter
+from NotificationCenter import SOCKET_SERVER_URL
 
 
-SERVER_URL_BASE = 'http://127.0.0.1:9876'
+SERVER_URL_BASE = 'http://127.0.0.1:8000'
 
 
 def getready():
@@ -20,24 +22,27 @@ def getready():
         res = requests.get(SERVER_URL_BASE + '/ready').json()
         if res:
             return res
-        time.sleep(5)
+        time.sleep(15)
 
 
 def getmoves(gid):
     return requests.post(SERVER_URL_BASE + '/move', {'gid': gid}).json()
 
 
+socketio = SocketIO(SOCKET_SERVER_URL, verify=False)
+# socketio = Emitter({'host': '127.0.0.1', 'port': 3000})
+
+
 def emit(topic, data):
-    with SocketIO(SOCKET_SERVER_URL, verify=False) as socketio:
-        socketio.emit(topic, data)
-        socketio.wait(seconds=1)
+    socketio.emit(topic, data)
+    # socketio.Emit(topic, data)
 
 
-def updategame(gid, status=None):
-    data = {'gid': gid}
+def updategame(gid, checkpoint, status=None):
+    data = {'gid': gid, 'time': checkpoint}
     if status:
         data['status'] = status
-    return requests.post(SERVER_URL_BASE + '/update', data).json()
+    return requests.post(SERVER_URL_BASE + '/update', data).content
 
 
 PENDING = 0
@@ -51,27 +56,45 @@ if __name__ == '__main__':
         game = getready()
         gid = game['id']
         players = sorted(game['players'])
+        print('Game #{} ready, players: {}.'.format(gid, players))
 
-        field = Field(len(players))
+        num_players = len(players)
+        player_index = {pid: idx for idx, pid in enumerate(players)}
 
-        emit('init', {'gid': gid, 'map': field.getmap()})
-        updategame(gid, RUNNING)
+        field = Field(num_players)
+
+        checkpoint = datetime.utcnow()
+        emit('init', {'gid': gid, 'map': field.map.reshape(-1).tolist()})
+
+        updategame(gid, checkpoint, RUNNING)
+        print('Game #{} starts.'.format(gid))
 
         while True:
-            time.sleep(5)
-            moves = sorted(getmoves(gid))
+            time.sleep(2)
 
-            new_map, status = field.go(list(map(lambda x: x[1], moves)))
+            moves = [-1] * num_players
+            for pid, direction in getmoves(gid):
+                moves[player_index[pid]] = direction
+            print('Game #{} players move: {}.'.format(gid, moves))
 
+            new_map, raw_status = field.go(moves)
+
+            status = [2 if s else 0 for s in raw_status] if sum(raw_status) == 1 else raw_status
+
+            checkpoint = datetime.utcnow()
             emit('judged', {
-                'map': new_map,
-                'status': list(zip(map(lambda x: x[0], moves), status))
+                'gid': gid, 'map': new_map.tolist(),
+                'status': list(zip(players, status))
             })
 
-            if len([s for s in status if s == 1]) <= 1:
-                updategame(gid, END)
+            if sum(raw_status) <= 1:
+                updategame(gid, checkpoint, END)
+                print('Game #{} ended, result: {}.'.format(gid, status))
                 break
             else:
-                updategame(gid)
+                updategame(gid, checkpoint)
+                print('Game #{} updated, status: {}.'.format(gid, status))
 
-        time.sleep(10)
+        time.sleep(20)
+
+socketio.disconnect()

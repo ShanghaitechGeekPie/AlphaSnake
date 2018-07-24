@@ -16,14 +16,21 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 
-from .views import getinit, postgo, getready, getmove, updategame
+from .views import postinit, postgo, getready, getmove, updategame
+
+
+def blackhole(requests):
+    import time
+    time.sleep(10000)
+
 
 urlpatterns = [
-    url(r'^init/?$', getinit),
+    url(r'^init/?$', postinit),
     url(r'^go/?$', postgo),
     url(r'^ready/?$', getready),
     url(r'^move/?$', getmove),
     url(r'^update/?$', updategame),
+    url(r'^blackhole/?$', blackhole),
     # url(r'^/$', default),
     # url(r'^info/$', info),
     # url(r'^submit/$', submit),

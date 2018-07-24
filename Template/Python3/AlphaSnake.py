@@ -1,14 +1,37 @@
-import AlphaSnakeIO
+from AlphaSnakeIO import Game, STEP, STATUS
+
+
+# `register` and `submit_step` will block the program until update notification is received from server.
+# You may use asynchronous algorithm to keep calculation when your CPU is idle.
 
 def main():
-    # Get the config of this game. call once in your program is enough.
-    conf = AlphaSnakeIO.get_game_conf();
+    # Create a game handle for server communication.
+    game = Game()
+    # Register an account with a username. call once in your program is enough.
+    battlefield = game.register('BetaSnake')
 
-    # YOUR ALGORITHM
+    while True:
+        # YOUR ALGORITHM
 
-    # Submit one step and get result of this step. call it to finish one step.
-    # If your program died this function will kill the program.
-    # If you have no choice but die, please at lease submit one step.
-    resault = AlphaSnakeIO.submit_step(AlphaSnakeIO.GoUp);
+        mystep = STEP.UP
+        mystep = STEP.DOWN  # TOWN
+        # mystep = STEP.FUNK
+        # mystep = STEP.YOU
+        mystep = STEP.UP
 
-main()
+        # Submit one step and get result of this step. call it to finish one step.
+        battlefield, status = game.submit_step(mystep)
+
+        if status == STATUS.ALIVE:
+            # Continue your algorithm for another iteration.
+            continue
+        elif status == STATUS.DIED:
+            print('Better luck next time!')
+            break
+        elif status == STATUS.WIN:
+            print('Winner winner, python dinner.')
+            break
+
+
+if __name__ == '__main__':
+    main()

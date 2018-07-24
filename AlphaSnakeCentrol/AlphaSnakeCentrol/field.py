@@ -223,6 +223,7 @@ class Field():
                 and a list with participants' ID (a positive number) as index and a number representing state
         '''
         # make sure the lengh of the list is the number of users
+        moves = [0] + moves
         assert len(moves) == len(self.users), "Diffreent input length as declared number of users"
 
         food_eaten = 0
@@ -256,7 +257,7 @@ class Field():
             self.map[(x, y)] = -1
 
         # return the state of the field and the users states
-        states = [user.state for user in self.users]
+        states = [user.state for user in self.users][1:]
         return (self.map.reshape(-1), states)
 
     def user_len(self, i):
@@ -311,7 +312,7 @@ if __name__ == '__main__':
         print(states, end='')
 
         try:
-            im.set_data(field_image.reshape(100,100))
+            im.set_data(field_image.reshape(100, 100))
             plt.pause(refresh_period)
             plt.draw()
         except:
