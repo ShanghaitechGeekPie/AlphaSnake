@@ -56,6 +56,7 @@ function connectServer() {
 		console.log("Socket Connected");
 	});
 	socket.on("judged", function(data) {
+		console.log(data);
 		console.log("Judged Message");
 
 		GameRenderer.Instance.updateBoardData(data.map);
@@ -63,9 +64,11 @@ function connectServer() {
 }
 
 function update() {
-	SnakeTest.Instance.run();
+	if (SnakeTest.Instance != null) {
+		SnakeTest.Instance.run();
 
-	GameRenderer.Instance.updateBoardData(SnakeTest.Instance.map);
+		GameRenderer.Instance.updateBoardData(SnakeTest.Instance.map);
+	}
 
 	GameRenderer.Instance.update();
 
