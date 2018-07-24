@@ -40,11 +40,12 @@ function main() {
 
 	let renderer = new GameRenderer(ctx, canvas.width, canvas.height);
 
-	let test = new SnakeTest();
+	// test
+	// let test = new SnakeTest();
 
-	for (let i = 0; i < 10; i++) {
-		test.addSnake();
-	}
+	// for (let i = 0; i < 10; i++) {
+	// 	test.addSnake();
+	// }
 
 	requestAnimationFrame(update);
 }
@@ -52,7 +53,12 @@ function main() {
 function connectServer() {
 	const socket = io.connect("http://as.chinacloudsites.cn");
 	socket.on("connect", function(data) {
-		socket.emit("join", "Hello World from client");
+		console.log("Socket Connected");
+	});
+	socket.on("judged", function(data) {
+		console.log("Judged Message");
+
+		GameRenderer.Instance.updateBoardData(data.map);
 	});
 }
 

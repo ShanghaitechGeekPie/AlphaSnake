@@ -1,4 +1,3 @@
-import { rgbToHsl, hslToRgb, hexToRgb } from "./color";
 import { COLOR_LIST, ROW, COL, BLOCK_WIDTH, BLOCK_HEIGHT } from "./common";
 
 
