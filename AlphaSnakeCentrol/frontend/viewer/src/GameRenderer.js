@@ -20,13 +20,10 @@ export default class GameRenderer {
 		this.movDirY = GameRenderer.VIEWPORT_MOV_DIR_NONE;
 
 		this.boardData = [];
-		this.isBoardDataUpdated = false;
 	}
 
 	updateBoardData(d) {
 		this.boardData = d;
-
-		this.isBoardDataUpdated = true;
 	}
 
 	update() {
@@ -41,12 +38,6 @@ export default class GameRenderer {
 		this.ctx.beginPath();
 		this.ctx.fillStyle = "#000000";
 		this.ctx.fillRect(0, 0, BLOCK_WIDTH * COL, BLOCK_HEIGHT * ROW);
-
-		if (!this.isBoardDataUpdated) {
-			return;
-		}
-
-		this.isBoardDataUpdated = false;
 
 		for (let i = 0; i < ROW * COL; i++) {
 			let v = this.boardData[i];
