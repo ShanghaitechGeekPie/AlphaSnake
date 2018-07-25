@@ -15,5 +15,5 @@ export const COLOR_LIST = [
 export const ROW = 100;
 export const COL = 100;
 
-export const BLOCK_WIDTH = 15;
-export const BLOCK_HEIGHT = 15;
+export const BLOCK_WIDTH = 8;
+export const BLOCK_HEIGHT = 8;

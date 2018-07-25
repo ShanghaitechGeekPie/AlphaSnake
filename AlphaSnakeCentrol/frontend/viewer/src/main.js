@@ -51,7 +51,8 @@ function main() {
 }
 
 function connectServer() {
-	const socket = io.connect("http://as.chinacloudsites.cn");
+	// const socket = io.connect("http://as.chinacloudsites.cn");
+	const socket = io.connect("http://127.0.0.1:3000");
 	socket.on("connect", function(data) {
 		console.log("Socket Connected");
 	});
@@ -69,6 +70,8 @@ function update() {
 
 		GameRenderer.Instance.updateBoardData(SnakeTest.Instance.map);
 	}
+
+	// console.log(GameRenderer.Instance.boardData);
 
 	GameRenderer.Instance.update();
 
