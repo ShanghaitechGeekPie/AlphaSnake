@@ -123,6 +123,11 @@ export default class GameRenderer {
 
 			this.ctx.rect(0, 0, BLOCK_WIDTH, BLOCK_HEIGHT);
 			this.ctx.fill();
+		} else if (type == ELEMENT_FOOD) {
+			this.ctx.fillStyle = "#FF0000";
+
+			this.ctx.rect(0, 0, BLOCK_WIDTH, BLOCK_HEIGHT);
+			this.ctx.fill();
 		}
 
 		this.ctx.restore();
