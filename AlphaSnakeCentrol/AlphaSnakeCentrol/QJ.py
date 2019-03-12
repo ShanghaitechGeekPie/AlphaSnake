@@ -2,7 +2,7 @@
 # @Author: robertking
 # @Date:   2018-07-15 22:59:23
 # @Last Modified by:   robertking
-# @Last Modified time: 2018-07-19 01:38:56
+# @Last Modified time: 2019-03-12 16:34:59
 
 
 from field import Field
@@ -11,10 +11,11 @@ import requests
 from datetime import datetime
 from socketIO_client import SocketIO
 # from socket_io_emitter import Emitter
-from NotificationCenter import SOCKET_SERVER_URL
+import os
 
 
-SERVER_URL_BASE = 'http://127.0.0.1:8000'
+SOCKET_SERVER_URL = os.environ['SOCKET_SERVER_URL']
+SERVER_URL_BASE = os.environ['SERVER_URL_BASE']
 
 
 def getready():

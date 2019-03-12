@@ -5,13 +5,16 @@ import base64
 from django.db import transaction
 from django.db.models import F
 from django.http.response import HttpResponse, HttpResponseBadRequest
+from django.shortcuts import render
 
 from db.models import Game, Player, Step
 
-from .NotificationCenter import NotificationCenter, SOCKET_SERVER_URL
+from .NotificationCenter import NotificationCenter
 
 import logging
 
+
+SOCKET_SERVER_URL = os.environ['SOCKET_SERVER_URL']
 
 logger = logging.getLogger(__name__)
 
@@ -131,3 +134,7 @@ def updategame(request):
         update_fields['status'] = request.POST['status']
     Game.objects.filter(id=request.POST['gid']).update(**update_fields)
     return HttpResponse('')
+
+
+def homepage(request):
+    return render(request, 'index.html')

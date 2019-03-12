@@ -1,0 +1,4 @@
+numpy
+django-cors-headers
+django>=1.11,<2.0
+socketIO-client

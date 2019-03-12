@@ -2,15 +2,16 @@
 # @Author: robertking, philipxyc
 # @Date:   2018-07-13 17:34:38
 # @Last Modified by:   robertking
-# @Last Modified time: 2018-07-19 01:49:02
+# @Last Modified time: 2019-03-12 16:34:49
 
 
 import threading
 from socketIO_client import SocketIO
 import logging
+import os
 
 
-SOCKET_SERVER_URL = '127.0.0.1:3000'
+SOCKET_SERVER_URL = os.environ['SOCKET_SERVER_URL']
 
 logger = logging.getLogger(__name__)
 
