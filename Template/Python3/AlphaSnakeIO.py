@@ -1,8 +1,8 @@
 import requests
 
 
-#  SERVER_ROOT = 'https://alphasnake.geekpie.club'
-SERVER_ROOT = 'http://127.0.0.1:8000'
+SERVER_ROOT = 'https://alphasnake.geekpie.club'
+# SERVER_ROOT = 'http://127.0.0.1:8000'
 
 # define of step choice
 class STEP:

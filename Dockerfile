@@ -9,6 +9,8 @@ COPY launch.sh ./
 ENV SOCKET_SERVER_URL=127.0.0.1:3000
 ENV SERVER_URL_BASE=http://127.0.0.1:8000
 
+ENV ROUND_TIME_SLICE=10
+
 # TODO: build frontend assets
 
 EXPOSE 8000

@@ -5,7 +5,12 @@ AlphaSnake
 
 ```bash
 docker build -t geekpie/alphasnake .
-docker run -e CLIENT_SOCKET_SERVER_URL=127.0.0.1:3000 -e SOCKET_SERVER_URL=socketserver:3000 -e SERVER_URL_BASE=http://127.0.0.1:8000 -e SECRET_KEY=$secret_key -p 8000:8000 geekpie/alphasnake
+docker run -e CLIENT_SOCKET_SERVER_URL=127.0.0.1:3000 \
+           -e SOCKET_SERVER_URL=socketserver:3000 \
+           -e SERVER_URL_BASE=http://127.0.0.1:8000 \
+           -e SECRET_KEY=$secret_key \
+           -e ROUND_TIME_SLICE=10 \
+           -p 8000:8000 geekpie/alphasnake
 ```
 
 ### Socket Server URL

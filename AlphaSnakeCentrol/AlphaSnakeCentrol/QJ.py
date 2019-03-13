@@ -17,6 +17,8 @@ import os
 SOCKET_SERVER_URL = os.environ['SOCKET_SERVER_URL']
 SERVER_URL_BASE = os.environ['SERVER_URL_BASE']
 
+ROUND_TIME_SLICE = os.environ['ROUND_TIME_SLICE']
+
 
 def getready():
     while True:
@@ -71,7 +73,7 @@ if __name__ == '__main__':
         print('Game #{} starts.'.format(gid))
 
         while True:
-            time.sleep(2)
+            time.sleep(ROUND_TIME_SLICE)
 
             moves = [-1] * num_players
             for pid, direction in getmoves(gid):
