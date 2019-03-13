@@ -84,7 +84,7 @@ WSGI_APPLICATION = 'AlphaSnakeCentrol.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(os.path.join(BASE_DIR, 'sqlite_db'), 'db.sqlite3'),
+        'NAME': os.path.join(BASE_DIR, 'sqlite_db', 'db.sqlite3'),
     }
 }
 
@@ -127,7 +127,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'frontend', 'viewer', 'public')
+    os.path.join(BASE_DIR, 'static')
 ]
 
 CORS_ORIGIN_WHITELIST = (
