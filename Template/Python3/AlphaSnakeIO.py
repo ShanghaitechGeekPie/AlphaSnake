@@ -1,8 +1,8 @@
 import requests
 
 
-SERVER_ROOT = 'https://alphasnake.geekpie.club'
-# SERVER_ROOT = 'http://127.0.0.1:8000'
+#  SERVER_ROOT = 'https://alphasnake.geekpie.club'
+SERVER_ROOT = 'http://127.0.0.1:8000'
 
 # define of step choice
 class STEP:
@@ -28,7 +28,10 @@ class Game:
         pass
 
     def register(self, name):
-        res = requests.post(SERVER_ROOT + '/init', {'name': name}).json()
+        res = requests.post(SERVER_ROOT + '/init', {'name': name})
+        print(res.content)
+        res = res.json()
+        #  res = requests.post(SERVER_ROOT + '/init', {'name': name}).json()
         self._pid = res['pid']
         self._cookie = res['cookie']
         return res['map']
