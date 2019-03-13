@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
 import os
+from urllib3.util import parse_url
 
 import logging.config
 LOGGING_CONFIG = None
@@ -28,7 +29,7 @@ SECRET_KEY = os.environ['SECRET_KEY']
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [os.environ['ALLOWED_HOST'],]
+ALLOWED_HOSTS = [os.environ['ALLOWED_HOST'], parse_url(os.environ['SERVER_URL_BASE']).host]
 
 
 # Application definition
