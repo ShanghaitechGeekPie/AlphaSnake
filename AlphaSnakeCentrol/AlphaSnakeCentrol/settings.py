@@ -16,7 +16,7 @@ import logging.config
 LOGGING_CONFIG = None
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'sqlite_db')
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 # Quick-start development settings - unsuitable for production
@@ -83,7 +83,7 @@ WSGI_APPLICATION = 'AlphaSnakeCentrol.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': os.path.join(os.path.join(BASE_DIR, 'sqlite_db'), 'db.sqlite3'),
     }
 }
 
