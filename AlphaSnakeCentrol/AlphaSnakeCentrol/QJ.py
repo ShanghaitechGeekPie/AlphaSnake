@@ -18,7 +18,7 @@ SOCKET_SERVER_URL = os.environ['SOCKET_SERVER_URL']
 SERVER_URL_BASE = os.environ['SERVER_URL_BASE']
 
 ROUND_TIME_SLICE = float(os.environ['ROUND_TIME_SLICE'])
-
+EMIT_KEY = os.environ['EMIT_KEY']
 
 def getready():
     while True:
@@ -37,6 +37,7 @@ socketio = SocketIO(SOCKET_SERVER_URL, verify=False)
 
 
 def emit(topic, data):
+    data['key'] = EMIT_KEY
     socketio.emit(topic, data)
     # socketio.Emit(topic, data)
 
