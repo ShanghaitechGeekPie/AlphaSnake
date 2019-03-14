@@ -2,7 +2,7 @@
 # @Author: robertking
 # @Date:   2018-07-15 22:59:23
 # @Last Modified by:   robertking
-# @Last Modified time: 2019-03-12 16:34:59
+# @Last Modified time: 2019-03-14 01:55:21
 
 
 from field import Field
@@ -17,7 +17,7 @@ import os
 SOCKET_SERVER_URL = os.environ['SOCKET_SERVER_URL']
 SERVER_URL_BASE = os.environ['SERVER_URL_BASE']
 
-ROUND_TIME_SLICE = os.environ['ROUND_TIME_SLICE']
+ROUND_TIME_SLICE = float(os.environ['ROUND_TIME_SLICE'])
 
 
 def getready():
@@ -45,7 +45,7 @@ def updategame(gid, checkpoint, status=None):
     data = {'gid': gid, 'time': checkpoint}
     if status:
         data['status'] = status
-    return requests.post(SERVER_URL_BASE + '/update', data).content
+    return requests.post(SERVER_URL_BASE + '/update', data)
 
 
 PENDING = 0
@@ -69,7 +69,7 @@ if __name__ == '__main__':
         checkpoint = datetime.utcnow()
         emit('init', {'gid': gid, 'map': field.map.reshape(-1).tolist()})
 
-        updategame(gid, checkpoint, RUNNING)
+        print('Game update result:', updategame(gid, checkpoint, RUNNING).status_code)
         print('Game #{} starts.'.format(gid))
 
         while True:
@@ -91,11 +91,11 @@ if __name__ == '__main__':
             })
 
             if sum(raw_status) <= 1:
-                updategame(gid, checkpoint, END)
+                print('Game update result:', updategame(gid, checkpoint, END).status_code)
                 print('Game #{} ended, result: {}.'.format(gid, status))
                 break
             else:
-                updategame(gid, checkpoint)
+                print('Game update result:', updategame(gid, checkpoint).status_code)
                 print('Game #{} updated, status: {}.'.format(gid, status))
 
         time.sleep(20)

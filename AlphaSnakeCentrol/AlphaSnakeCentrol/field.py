@@ -224,7 +224,7 @@ class Field():
         '''
         # make sure the lengh of the list is the number of users
         moves = [0] + moves
-        assert len(moves) == len(self.users), "Diffreent input length as declared number of users"
+        assert len(moves) == len(self.users), "Different input length as declared number of users"
 
         food_eaten = 0
         # iterate each users to move the snake
