@@ -8,7 +8,7 @@ def main():
     # Create a game handle for server communication.
     game = Game()
     # Register an account with a username. call once in your program is enough.
-    battlefield = game.register('BetaSnake')
+    battlefield, local_id = game.register('BetaSnake')
 
     while True:
         # YOUR ALGORITHM

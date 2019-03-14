@@ -2,7 +2,7 @@
 # @Author: robertking
 # @Date:   2018-07-15 22:59:23
 # @Last Modified by:   robertking
-# @Last Modified time: 2019-03-14 01:55:21
+# @Last Modified time: 2019-03-14 12:56:21
 
 
 from field import Field
@@ -67,7 +67,7 @@ if __name__ == '__main__':
         field = Field(num_players)
 
         checkpoint = datetime.utcnow()
-        emit('init', {'gid': gid, 'map': field.map.reshape(-1).tolist()})
+        emit('init', {'gid': gid, 'map': field.map.reshape(-1).tolist(), 'players': players})
 
         print('Game update result:', updategame(gid, checkpoint, RUNNING).status_code)
         print('Game #{} starts.'.format(gid))

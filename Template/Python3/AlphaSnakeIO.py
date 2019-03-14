@@ -4,6 +4,8 @@ import requests
 SERVER_ROOT = 'https://alphasnake.geekpie.club'
 # SERVER_ROOT = 'http://127.0.0.1:8000'
 
+DEBUG = True
+
 # define of step choice
 class STEP:
     UNDEFINED = -1    # only for player died
@@ -29,12 +31,13 @@ class Game:
 
     def register(self, name):
         res = requests.post(SERVER_ROOT + '/init', {'name': name})
-        print(res.content)
+        if DEBUG:
+            print(res.content)
         res = res.json()
         #  res = requests.post(SERVER_ROOT + '/init', {'name': name}).json()
         self._pid = res['pid']
         self._cookie = res['cookie']
-        return res['map']
+        return res['map'], res['local_id']
 
     def submit_step(self, move):
         res = requests.post(SERVER_ROOT + '/go',

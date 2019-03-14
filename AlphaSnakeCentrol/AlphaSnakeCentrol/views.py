@@ -60,7 +60,8 @@ def postinit(request):
     return HttpResponse(json.dumps({
         'pid': player.id,
         'cookie': cookie,
-        'map': msg['map']
+        'local_id': sorted(msg['players']).index(player.id) + 1,
+        'map': msg['map'],
     }))
 
 
