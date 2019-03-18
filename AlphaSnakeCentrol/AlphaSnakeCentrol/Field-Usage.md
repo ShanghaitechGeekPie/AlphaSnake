@@ -1,5 +1,7 @@
 # Tutorial
 
+![](./localDemo.gif)
+
 ## Installation
 
 To make your algorithm visable directly on your computer, please install the following pychon packages:
