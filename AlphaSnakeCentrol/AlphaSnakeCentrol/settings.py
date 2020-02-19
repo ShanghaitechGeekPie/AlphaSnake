@@ -131,9 +131,9 @@ STATICFILES_DIRS = [
 ]
 
 CORS_ORIGIN_WHITELIST = (
-    'google.com',
-    'hostname.example.com',
-    '0.0.0.0:8989'
+    'https://google.com',
+    'http://hostname.example.com',
+    'http://0.0.0.0:8989'
 )
 
 
